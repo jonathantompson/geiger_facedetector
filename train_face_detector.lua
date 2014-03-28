@@ -53,7 +53,7 @@ if opt.train_network then
    model:add(nn.SpatialConvolution(1, 8, 5, 5))  -- (# input planes, # output planes, kW, kH)
    model:add(nn.Tanh())
    model:add(nn.SpatialMaxPooling(4, 4, 4, 4))  -- (poolW, poolH, poolstrideW, poolstrideH)
-   model:add(nn.SpatialConvolutionMap(nn.tables.random(8, 64, 4), 7, 7))  -- TODO: Simplify this
+   model:add(nn.SpatialConvolutionMap(nn.tables.random(8, 64, 4), 7, 7))
    model:add(nn.Tanh())
    model:add(nn.Reshape(64))  -- Reshape the convolution map to a 1D vector
    model:add(nn.Linear(64,2))  -- Fully connected network with d_in=64, d_out=2
@@ -166,7 +166,6 @@ function train(dataset)
    print('<trainer> on training set:')
    print("<trainer> online epoch # " .. epoch .. ' [batchSize = ' .. batchSize .. ']')
    for t = 1,dataset:size(),batchSize do
-      collectgarbage()
       if (math.mod(t, 100) == 0 or t == dataset:size()) then
         -- disp progress
         progress(t, dataset:size())
@@ -263,7 +262,6 @@ function test(dataset)
    -- test over given dataset
    print('<trainer> on testing Set:')
    for t = 1,dataset:size() do
-      collectgarbage()
       if (math.mod(t, 100) == 0 or t == dataset:size()) then
         -- disp progress
         progress(t, dataset:size())
