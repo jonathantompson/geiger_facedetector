@@ -1,3 +1,4 @@
 datasets
 train.log
 test.log
+*.swp

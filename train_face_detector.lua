@@ -20,8 +20,12 @@
 
 require 'xlua'
 require 'image'
-require 'nnx'
+require 'nn'
 require 'optim'
+
+dofile("pbar.lua")
+dofile("DataSet.lua")
+dofile("DataList.lua")
 
 ----------------------------------------------------------------------
 -- Training parameters and other options
@@ -43,7 +47,7 @@ torch.manualSeed(opt.seed)
 ----------------------------------------------------------------------
 -- define network to train
 ----------------------------------------------------------------------
-if not opt.train_network then
+if opt.train_network then
    model = nn.Sequential()
    model:add(nn.SpatialContrastiveNormalization(1, image.gaussian1D(5)))
    model:add(nn.SpatialConvolution(1, 8, 5, 5))  -- (# input planes, # output planes, kW, kH)
@@ -54,7 +58,7 @@ if not opt.train_network then
    model:add(nn.Reshape(64))  -- Reshape the convolution map to a 1D vector
    model:add(nn.Linear(64,2))  -- Fully connected network with d_in=64, d_out=2
 else
-   print('<trainer> reloading previously trained network')
+   print('reloading previously trained network')
    model = nn.Sequential()
    model:read(torch.DiskFile(opt.network))
 end
@@ -162,8 +166,11 @@ function train(dataset)
    print('<trainer> on training set:')
    print("<trainer> online epoch # " .. epoch .. ' [batchSize = ' .. batchSize .. ']')
    for t = 1,dataset:size(),batchSize do
-      -- disp progress
-      xlua.progress(t, dataset:size())
+      collectgarbage()
+      if (math.mod(t, 100) == 0 or t == dataset:size()) then
+        -- disp progress
+        progress(t, dataset:size())
+      end
 
       -- create mini batch
       local inputs = {}
@@ -203,11 +210,6 @@ function train(dataset)
 
                           -- update confusion
                           confusion:add(output, targets[i])
-
-                          -- visualize?
-                          if opt.visualize then
-                             display(inputs[i])
-                          end
                        end
 
                        -- normalize gradients and f(X)
@@ -261,8 +263,11 @@ function test(dataset)
    -- test over given dataset
    print('<trainer> on testing Set:')
    for t = 1,dataset:size() do
-      -- disp progress
-      xlua.progress(t, dataset:size())
+      collectgarbage()
+      if (math.mod(t, 100) == 0 or t == dataset:size()) then
+        -- disp progress
+        progress(t, dataset:size())
+      end
 
       -- get new sample
       local sample = dataset[t]
