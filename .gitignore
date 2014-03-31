@@ -1,4 +1,5 @@
 datasets
-train.log
-test.log
+train.log*
+test.log*
 *.swp
+face.net*
