@@ -22,6 +22,7 @@ require 'xlua'
 require 'image'
 require 'nn'
 require 'optim'
+require 'paths'
 
 dofile("pbar.lua")
 dofile("DataSet.lua")
@@ -75,9 +76,9 @@ criterion.sizeAverage = true
 ----------------------------------------------------------------------
 -- Load the dataset from the web
 ----------------------------------------------------------------------
-if not sys.dirp(opt.dataset) then
-   local path = sys.dirname(opt.dataset)
-   local tar = sys.basename(opt.www)
+if not paths.dirp(opt.dataset) then
+   local path = paths.dirname(opt.dataset)
+   local tar = paths.basename(opt.www)
    os.execute('mkdir -p ' .. path .. '; '..
               'cd ' .. path .. '; '..
               'wget ' .. opt.www .. '; '..
@@ -143,8 +144,8 @@ end
 confusion = optim.ConfusionMatrix{'Face','Background'}
 
 -- log results to files
-trainLogger = optim.Logger(paths.concat(sys.dirname(opt.save), 'train.log'))
-testLogger = optim.Logger(paths.concat(sys.dirname(opt.save), 'test.log'))
+trainLogger = optim.Logger(paths.concat(paths.dirname(opt.save), 'train.log'))
+testLogger = optim.Logger(paths.concat(paths.dirname(opt.save), 'test.log'))
 
 -- optim config
 config = {learningRate = 1e-3, weightDecay = 1e-3,
@@ -235,8 +236,8 @@ function train(dataset)
 
    -- save/log current net
    local filename = opt.save
-   os.execute('mkdir -p ' .. sys.dirname(filename))
-   if sys.filep(filename) then
+   os.execute('mkdir -p ' .. paths.dirname(filename))
+   if paths.filep(filename) then
       os.execute('mv ' .. filename .. ' ' .. filename .. '.old')
    end
    print('<trainer> saving network to '..filename)

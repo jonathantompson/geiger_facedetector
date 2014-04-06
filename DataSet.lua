@@ -56,7 +56,7 @@ function lDataSet:load(...)
    local datasetLoadedFromFile = false
    if (self.cacheFileName ~= nil) then
       fileName = self.cacheFileName .. '-' .. nbSamplesRequired
-      if sys.filep(fileName) then
+      if paths.filep(fileName) then
          -- File found
          print('<DataSet> Loading samples from cached file ' .. fileName)
          f = torch.DiskFile(fileName, 'rw')
@@ -135,7 +135,7 @@ function lDataSet:append(...)
       {arg='padding',type='boolean',help='do we padd all the inputs in w,h'}
    )
    -- parse args
-   local files = sys.dir(dataSetFolder)
+   local files = paths.dir(dataSetFolder)
 
    print('<DataSet> Loading samples from ' .. args.dataSetFolder .. '/')
 
@@ -154,7 +154,7 @@ function lDataSet:append(...)
 
       if (string.find(file,'.png')) then
          -- load the PNG into a new Tensor
-         pathToPng = sys.concat(dataSetFolder, file)
+         pathToPng = paths.concat(dataSetFolder, file)
          input = image.loadPNG(pathToPng,channels)
 
          -- parse the file name and set the ouput from it
