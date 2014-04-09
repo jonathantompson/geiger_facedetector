@@ -303,7 +303,7 @@ function lDataSet:display(nSamples,legend)
    for i = 1,nSamples do
       table.insert(samplesToShow, self[i][1])
    end
-   image.display{image=samplesToShow,gui=false,legend=legend}
+   image.display{image=samplesToShow,gui=false,legend=legend,zoom=2}
 end
 
 function lDataSet:useCacheFile(fileName)
