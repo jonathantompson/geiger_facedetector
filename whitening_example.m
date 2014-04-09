@@ -6,7 +6,7 @@ x = imresize(x, 1/4);
 imshow(x)
 w = size(x, 2);
 h = size(x, 1);
-patch_size = 26;
+patch_size = 30;
 patch_stride = patch_size;
 
 % Break image into patches (there is probably a faster way to do this
@@ -21,7 +21,7 @@ end
 % Perform whitening (from:
 % http://ufldl.stanford.edu/wiki/index.php/Implementing_PCA/Whitening)
 patches = reshape(patches, size(patches, 1), patch_size * patch_size);
-k = 100;
+k = size(patches, 1);  % Full dimension (no dimensionality reduction)
 avg = mean(patches, 1);
 patches = patches - repmat(avg, size(patches, 1), 1);
 sigma = patches * patches' / size(patches, 2);
