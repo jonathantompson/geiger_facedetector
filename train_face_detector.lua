@@ -39,7 +39,8 @@ opt = {
   patches = 'all',  -- number of patches to use
   testset = 0.2,  -- Percentage of images to use as the testset
   visualize = true,  -- Visualize the dataset
-  seed = 0  -- Seed to randomly initialize the network weights
+  seed = 0,  -- Seed to randomly initialize the network weights
+  max_epochs = 2,  -- Number of epochs to train the model for
 }
 
 torch.setdefaulttensortype('torch.FloatTensor')
@@ -134,6 +135,14 @@ trainData:appendDataSet(dataBG,'Background')
 if opt.visualize then
    trainData:display(100,'trainData')
    testData:display(100,'testData')
+
+   index = 1
+   img = trainData[index][1]
+   label = trainData[index][2]
+   legend_str = 'trainData[' .. tostring(index) .. ']:'
+   image.display{image=img, zoom=10, legend=legend_str}
+   print('Label for ' .. legend_str .. ':')
+   print(label)
 end
 
 ----------------------------------------------------------------------
@@ -260,6 +269,9 @@ function test(dataset)
       parameters:copy(average)
    end
 
+   local pred_values = torch.FloatTensor(dataset:size(), 2)
+   local target_values = torch.FloatTensor(dataset:size(), 2)
+
    -- test over given dataset
    print('<trainer> on testing Set:')
    for t = 1,dataset:size() do
@@ -273,8 +285,12 @@ function test(dataset)
       local input = sample[1]
       local target = sample[2]
 
+      local pred = model:forward(input)
+      pred_values[{t, {}}]:copy(pred)
+      target_values[{t, {}}]:copy(target)
+
       -- test sample
-      confusion:add(model:forward(input), target)
+      confusion:add(pred, target)
    end
 
    -- timing
@@ -292,20 +308,17 @@ function test(dataset)
       -- restore parameters
       parameters:copy(cachedparams)
    end
+   return pred_values, target_values
 end
 
 ----------------------------------------------------------------------
 -- Perform a train + test loop
 ----------------------------------------------------------------------
-while true do
+for i = 1, opt.max_epochs do
    -- train/test
    train(trainData)
-   test(testData)
-   --[[
-   -- plot errors
-   trainLogger:style{['% mean class accuracy (train set)'] = '-'}
-   testLogger:style{['% mean class accuracy (test set)'] = '-'}
-   trainLogger:plot()
-   testLogger:plot()
-   --]]
+   pred_values, target_values = test(testData)
 end
+
+err = pred_values - target_values
+ 

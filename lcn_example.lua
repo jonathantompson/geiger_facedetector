@@ -22,3 +22,7 @@ div = nn.SpatialDivisiveNormalization(nchan, kernel)
 out_div = div:forward(out_sub)
 image.display{image=out_div, legend='divisive norm output'}
 
+img = image.rgb2y(img)
+lcn = nn.SpatialContrastiveNormalization(1, kernel)
+out_lcn = lcn:forward(img)
+image.display{image=out_lcn, legend='lcn output'}
