@@ -33,16 +33,17 @@ end
 function lDataSet:load(...)
    -- parse args
    local args, dataSetFolder, nbSamplesRequired, cacheFile, channels, 
-   sampleSize,padding
+   sampleSize,padding, yuv2rgb
       = xlua.unpack(
       {...},
       'DataSet.load', nil,
       {arg='dataSetFolder', type='string', help='path to dataset', req=true},
       {arg='nbSamplesRequired', type='number', help='number of patches to load', default='all'},
       {arg='cacheFile', type='string', help='path to file to cache files'},
-      {arg='channels', type='number', help='nb of channels', default=1},
+      {arg='channels', type='number', help='nb of channels', default=3},
       {arg='sampleSize', type='table', help='resize all sample: {c,w,h}'},
-      {arg='padding', type='boolean', help='center sample in w,h dont rescale'}
+      {arg='padding', type='boolean', help='center sample in w,h dont rescale'},
+      {arg='yuv2rgb', type='boolean', help='convert yuv 2 rgb', default=false}
    )
    self.cacheFileName = cacheFile or self.cacheFileName
 
@@ -71,7 +72,8 @@ function lDataSet:load(...)
    if (datasetLoadedFromFile == false) then
       self:append{dataSetFolder=dataSetFolder, channels=channels,
                   nbSamplesRequired=nbSamplesRequired,
-                  sampleSize=sampleSize}
+                  sampleSize=sampleSize,
+                  yuv2rgb=yuv2rgb}
       -- if cache name given, create it now
       if (fileName ~= nil) then
          print('<DataSet> Dumping dataset to cache file ' .. fileName .. ' for fast retrieval')
@@ -121,7 +123,7 @@ end
 function lDataSet:append(...)
    -- parse args
    local args, dataSetFolder, channels, nbSamplesRequired, useLabelPiped,
-   useDirAsLabel, nbLabels, sampleSize, padding
+   useDirAsLabel, nbLabels, sampleSize, padding, yuv2rgb
       = xlua.unpack(
       {...},
       'DataSet:append', 'append a folder to the dataset object',
@@ -132,7 +134,8 @@ function lDataSet:append(...)
       {arg='useDirAsLabel', type='boolean', help='flag to use the directory as label',default=false},
       {arg='nbLabels', type='number', help='how many classes (goes with useDirAsLabel)', default=1},
       {arg='sampleSize', type='table', help='resize all sample: {c,w,h}'},
-      {arg='padding',type='boolean',help='do we padd all the inputs in w,h'}
+      {arg='padding',type='boolean',help='do we padd all the inputs in w,h'},
+      {arg='yuv2rgb', type='boolean', help='convert yuv 2 rgb', default=false}
    )
    -- parse args
    local files = paths.dir(dataSetFolder)
@@ -194,6 +197,9 @@ function lDataSet:append(...)
          end
          -- put input in 3D tensor
          input:resize(channels, h, w)
+         if (yuv2rgb) then
+           image.yuv2rgb(input, input)
+         end
 
          -- rescale ?
          if sampleSize then

@@ -35,7 +35,7 @@ opt = {
   save = 'face.net',  -- file to save network after each epoch
   train_network = true,  -- Otherwise load a trained network from file
   dataset = './datasets/faces_cut_yuv_32x32/',  -- path to dataset
-  www = 'http://data.neuflow.org/data/faces_cut_yuv_32x32.tar.gz',
+  www = 'http://cims.nyu.edu/~tompson/faces_cut_yuv_32x32.tar.gz',
   patches = 'all',  -- number of patches to use
   testset = 0.2,  -- Percentage of images to use as the testset
   visualize = true,  -- Visualize the dataset
@@ -143,6 +143,33 @@ if opt.visualize then
    image.display{image=img, zoom=10, legend=legend_str}
    print('Label for ' .. legend_str .. ':')
    print(label)
+end
+
+----------------------------------------------------------------------
+-- Save images to jpeg (you can ignore this)
+----------------------------------------------------------------------
+if false then
+  dofile("ls_files.lua")
+  dofile("ls_dirs.lua")
+  local out_dir = './datasets/faces_cut_rgb_32x32/'
+  os.execute('mkdir -p ' .. out_dir)
+  
+  local dirs = lsDirs(opt.dataset)
+  for d = 1, #dirs do
+    local cur_in_dir = opt.dataset .. dirs[d]
+    local cur_out_dir = out_dir .. dirs[d]
+    os.execute('mkdir -p ' .. cur_out_dir)
+    local files = lsFiles(cur_in_dir)
+    for f = 1, #files do
+      local cur_file = files[f]
+      if string.sub(cur_file, -1) == '*' then
+        cur_file = string.sub(cur_file, 1, -2)
+      end
+      local img_yuv = image.load(cur_in_dir .. cur_file)
+      local img_grey = img_yuv[{{1},{},{}}]
+      image.savePNG(cur_out_dir .. cur_file, img_grey) 
+    end
+  end   
 end
 
 ----------------------------------------------------------------------
